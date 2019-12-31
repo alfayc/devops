@@ -1,0 +1,31 @@
+language: php
+
+php:
+  -7.2
+  -7.3
+
+env:
+  - DEVOPS_VERSION=master
+  - DEVOPS_VERSION=2.7
+
+before script: 
+  - git clone --depth 1 git://github.com/alfayc/devops/page.php && cd ../devops
+  - mv ../devops-Upload app/Plugin/Upload
+  - chmod -R 777 app/tmp 
+  - chmod -R 777 app/webroot
+  - sh -c "mysql -e 'CREATE DATABASE devops_test;'"
+  - echo "<?php
+    class DATABASE_CONFIG{
+    public \$test = array(
+        'datasource' => 'Database/Mysql',
+        'database' => 'devops_test',
+        'host' => '127.0.0.1',
+        'login' => 'travis',
+        'persistent' => false,
+      );
+    }" > app/Config/database.php
+
+
+
+script:
+  -devops test Upload Model/Behavior/UploadBehavior --stderr
